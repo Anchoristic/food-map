@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>来都来了 - 美食种草地图</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 高德地图安全密钥配置（v2.0 必须） -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = { securityJsCode: 'ac9ec1497ddeda8161eba133a1651c30' };
+    </script>
+    <!-- 高德地图 JSAPI Loader（官方推荐加载方式） -->
+    <script src="https://webapi.amap.com/loader.js"></script>
+</head>
+<body>
+    <!-- ==================== 首页 ==================== -->
+    <div id="page-home" class="page active">
+        <header class="home-header">
+            <div class="logo-area">
+                <div class="logo-icon">🍜</div>
+                <h1 class="app-title">来都来了</h1>
+                <p class="app-slogan">来都来了，拔个草吧</p>
+            </div>
+        </header>
+        <main class="home-main">
+            <div class="entry-card" id="btn-add-food">
+                <div class="entry-icon">📍</div>
+                <div class="entry-text">
+                    <h2>添加美食标记</h2>
+                    <p>种草一家想去的店</p>
+                </div>
+                <div class="entry-arrow">›</div>
+            </div>
+            <div class="entry-card" id="btn-nearby-food">
+                <div class="entry-icon">🔍</div>
+                <div class="entry-text">
+                    <h2>附近有什么好吃的</h2>
+                    <p>看看附近有没有种过的草</p>
+                </div>
+                <div class="entry-arrow">›</div>
+            </div>
+            <div class="entry-card" id="btn-my-collection">
+                <div class="entry-icon">📋</div>
+                <div class="entry-text">
+                    <h2>我的收藏</h2>
+                    <p>管理所有种草店铺</p>
+                </div>
+                <div class="entry-arrow">›</div>
+            </div>
+        </main>
+        <footer class="home-footer">
+            <p>数据保存在本地 · 支持高德地图</p>
+        </footer>
+    </div>
+
+    <!-- ==================== 添加美食标记页 ==================== -->
+    <div id="page-add" class="page">
+        <header class="page-header">
+            <button class="btn-back" data-target="page-home">‹</button>
+            <h1>添加美食标记</h1>
+            <div class="header-right"></div>
+        </header>
+        <main class="page-main">
+            <!-- 搜索区域 -->
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="add-search-input" placeholder="搜索店铺名称，如：四季民福、京A" autocomplete="off">
+                    <button class="btn-search" id="add-search-btn">搜索</button>
+                </div>
+                <div id="add-search-results" class="search-results"></div>
+            </div>
+            <!-- 表单区域 -->
+            <form id="add-food-form" class="food-form">
+                <div class="form-group">
+                    <label>店铺名称 <span class="required">*</span></label>
+                    <input type="text" id="add-name" placeholder="从搜索结果选择或手动输入" required>
+                </div>
+                <div class="form-group">
+                    <label>详细地址 <span class="required">*</span></label>
+                    <input type="text" id="add-address" placeholder="从搜索结果自动填充" required>
+                </div>
+                <div class="form-group hidden">
+                    <label>经度</label>
+                    <input type="number" id="add-lng" step="any">
+                </div>
+                <div class="form-group hidden">
+                    <label>纬度</label>
+                    <input type="number" id="add-lat" step="any">
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea id="add-note" placeholder="排队很久？朋友推荐？记录一下..." rows="3"></textarea>
+                </div>
+                <div class="form-preview">
+                    <div class="shop-avatar-preview" id="add-avatar-preview"></div>
+                    <p class="preview-hint">店铺图标预览</p>
+                </div>
+                <button type="submit" class="btn-primary">种草！</button>
+            </form>
+        </main>
+    </div>
+
+    <!-- ==================== 查询附近页 ==================== -->
+    <div id="page-nearby" class="page">
+        <header class="page-header">
+            <button class="btn-back" data-target="page-home">‹</button>
+            <h1>附近有什么好吃的</h1>
+            <div class="header-right"></div>
+        </header>
+        <main class="page-main">
+            <!-- 定位方式选择 -->
+            <div class="locate-section">
+                <div class="search-box">
+                    <input type="text" id="nearby-search-input" placeholder="输入地点，如：三里屯、国贸、望京" autocomplete="off">
+                    <button class="btn-search" id="nearby-search-btn">搜索</button>
+                </div>
+                <div id="nearby-search-results" class="search-results"></div>
+                <button class="btn-location" id="btn-current-location">
+                    <span class="location-icon">📍</span>
+                    使用当前定位
+                </button>
+            </div>
+            <!-- 搜索半径选择 -->
+            <div class="radius-section">
+                <label>搜索范围：</label>
+                <div class="radius-options">
+                    <button class="radius-btn active" data-radius="3">3km</button>
+                    <button class="radius-btn" data-radius="5">5km</button>
+                    <button class="radius-btn" data-radius="10">10km</button>
+                    <button class="radius-btn" data-radius="20">20km</button>
+                </div>
+            </div>
+            <!-- 视图切换 -->
+            <div class="view-toggle" id="view-toggle">
+                <button class="toggle-btn active" data-view="list">列表</button>
+                <button class="toggle-btn" data-view="map">地图</button>
+            </div>
+            <!-- 列表视图 -->
+            <div id="nearby-list-view" class="nearby-view active">
+                <div id="nearby-list" class="shop-list"></div>
+            </div>
+            <!-- 地图视图 -->
+            <div id="nearby-map-view" class="nearby-view">
+                <div id="nearby-map" class="map-container"></div>
+            </div>
+            <!-- 空状态 -->
+            <div id="nearby-empty" class="empty-state hidden">
+                <div class="empty-icon">🍽️</div>
+                <p>附近没有找到种草的店铺</p>
+                <p class="empty-hint">试试扩大搜索范围，或者先去首页添加一些美食标记吧</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== 我的收藏页 ==================== -->
+    <div id="page-collection" class="page">
+        <header class="page-header">
+            <button class="btn-back" data-target="page-home">‹</button>
+            <h1>我的收藏</h1>
+            <div class="header-right">
+                <button class="btn-filter" id="btn-filter">筛选</button>
+            </div>
+        </header>
+        <main class="page-main">
+            <!-- 筛选栏 -->
+            <div id="filter-bar" class="filter-bar hidden">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="unvisited">未拔草</button>
+                <button class="filter-btn" data-filter="visited">已拔草</button>
+            </div>
+            <!-- 搜索 -->
+            <div class="search-box collection-search">
+                <input type="text" id="collection-search-input" placeholder="搜索收藏的店铺..." autocomplete="off">
+            </div>
+            <div id="collection-list" class="shop-list"></div>
+            <div id="collection-empty" class="empty-state hidden">
+                <div class="empty-icon">📝</div>
+                <p>还没有收藏任何店铺</p>
+                <p class="empty-hint">去首页添加美食标记吧</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== 店铺详情页 ==================== -->
+    <div id="page-detail" class="page">
+        <header class="page-header">
+            <button class="btn-back" id="detail-back">‹</button>
+            <h1>店铺详情</h1>
+            <div class="header-right">
+                <button class="btn-edit" id="btn-edit-shop">编辑</button>
+            </div>
+        </header>
+        <main class="page-main">
+            <div id="detail-content" class="detail-content"></div>
+        </main>
+    </div>
+
+    <!-- ==================== 编辑店铺页 ==================== -->
+    <div id="page-edit" class="page">
+        <header class="page-header">
+            <button class="btn-back" id="edit-back">‹</button>
+            <h1>编辑店铺</h1>
+            <div class="header-right"></div>
+        </header>
+        <main class="page-main">
+            <form id="edit-food-form" class="food-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>店铺名称 <span class="required">*</span></label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label>详细地址 <span class="required">*</span></label>
+                    <input type="text" id="edit-address" required>
+                </div>
+                <div class="form-group hidden">
+                    <label>经度</label>
+                    <input type="number" id="edit-lng" step="any">
+                </div>
+                <div class="form-group hidden">
+                    <label>纬度</label>
+                    <input type="number" id="edit-lat" step="any">
+                </div>
+                <div class="form-group">
+                    <label>添加备注</label>
+                    <textarea id="edit-new-note" placeholder="添加新备注..." rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>历史备注</label>
+                    <div id="edit-notes-list" class="notes-list"></div>
+                </div>
+                <button type="submit" class="btn-primary">保存修改</button>
+                <button type="button" class="btn-danger" id="btn-delete-shop">删除店铺</button>
+            </form>
+        </main>
+    </div>
+
+    <!-- ==================== Toast 提示 ==================== -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ==================== 确认弹窗 ==================== -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <p id="confirm-message" class="modal-message"></p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="confirm-cancel">取消</button>
+                <button class="btn-confirm" id="confirm-ok">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
