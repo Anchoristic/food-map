@@ -3,14 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>来都来了 - 美食种草地图</title>
-    <link rel="stylesheet" href="css/style.css">
-    <!-- 高德地图安全密钥配置（v2.0 必须） -->
+    <!-- REM 适配脚本（750px设计稿基准） -->
     <script type="text/javascript">
-        window._AMapSecurityConfig = { securityJsCode: 'ac9ec1497ddeda8161eba133a1651c30' };
+        (function () {
+            var docEl = document.documentElement;
+            var maxWidth = 750;
+            function setRemUnit() {
+                var clientWidth = Math.min(docEl.clientWidth, maxWidth);
+                docEl.style.fontSize = (clientWidth / 7.5) + 'px';
+            }
+            setRemUnit();
+            window.addEventListener('resize', setRemUnit);
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) setRemUnit();
+            });
+        })();
+    </script>
+    <title>来都来了 - 美食种草地图</title>
+    <link rel="stylesheet" href="./styles/style.css">
+    <!-- 高德地图安全密钥配置（v2.0 必须）- 运行时注入，禁止硬编码 -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = { securityJsCode: '' };
     </script>
     <!-- 高德地图 JSAPI Loader（官方推荐加载方式） -->
     <script src="https://webapi.amap.com/loader.js"></script>
+    <!-- 运行时配置（部署时由CI/CD注入实际值） -->
+    <script src="./js/config.js"></script>
 </head>
 <body>
     <!-- ==================== 首页 ==================== -->
@@ -250,6 +268,6 @@
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script src="./js/app.js"></script>
 </body>
 </html>

@@ -5,7 +5,8 @@
 
 // ============ 常量与配置 ============
 const STORAGE_KEY = 'foodmap_shops';
-const AMAP_KEY = 'f0715f44af28ca680306e944871af0dd'; // 高德地图 Key
+// 高德地图 Key 从运行时配置读取，禁止硬编码
+const AMAP_KEY = (window.APP_CONFIG && window.APP_CONFIG.AMAP_KEY) || '';
 
 // 暖色随机配色（用于店铺头像背景）
 const AVATAR_COLORS = [
@@ -171,8 +172,9 @@ const UI = {
         const firstChar = name ? name.charAt(0) : '?';
         const colorIndex = name ? name.charCodeAt(0) % AVATAR_COLORS.length : 0;
         const bgColor = AVATAR_COLORS[colorIndex];
-        const fontSize = Math.round(size * 0.4);
-        return `<div class="shop-avatar" style="width:${size}px;height:${size}px;background:${bgColor};font-size:${fontSize}px;">${firstChar}</div>`;
+        const sizeRem = (size / 50) + 'rem';
+        const fontSizeRem = (Math.round(size * 0.4) / 50) + 'rem';
+        return `<div class="shop-avatar" style="width:${sizeRem};height:${sizeRem};background:${bgColor};font-size:${fontSizeRem};">${firstChar}</div>`;
     },
 
     /** 格式化距离显示 */
@@ -196,7 +198,7 @@ const UI = {
             ? `<div class="shop-note">${this.escapeHTML(latestNote)}</div>` : '';
 
         return `
-            <div class="shop-card" data-id="${shop.id}">
+            <div class="shop-card" data-id="${this.escapeHTML(shop.id)}">
                 ${this.avatarHTML(shop.name)}
                 <div class="shop-info">
                     <div class="shop-name">
@@ -213,12 +215,12 @@ const UI = {
             </div>`;
     },
 
-    /** HTML 转义 */
+    /** HTML 转义（含引号转义，防止属性上下文 XSS） */
     escapeHTML(str) {
         if (!str) return '';
         const div = document.createElement('div');
         div.textContent = str;
-        return div.innerHTML;
+        return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 };
 
@@ -507,7 +509,7 @@ const MapView = {
             if (centerLng && centerLat) {
                 const centerMarker = new AMap.Marker({
                     position: [centerLng, centerLat],
-                    content: '<div style="width:16px;height:16px;background:#1677ff;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+                    content: '<div style="width:0.32rem;height:0.32rem;background:#1677ff;border:1px solid #fff;border-radius:50%;box-shadow:0 0.04rem 0.16rem rgba(0,0,0,0.3);"></div>',
                     offset: new AMap.Pixel(-8, -8),
                     zIndex: 200
                 });
@@ -531,7 +533,7 @@ const MapView = {
 
         const marker = new AMap.Marker({
             position: [shop.lng, shop.lat],
-            content: `<div style="background:${bgColor};color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${firstChar}</div>`,
+            content: `<div style="background:${bgColor};color:#fff;width:0.64rem;height:0.64rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.28rem;font-weight:700;border:1px solid #fff;box-shadow:0 0.04rem 0.12rem rgba(0,0,0,0.3);">${firstChar}</div>`,
             offset: new AMap.Pixel(-16, -16),
             zIndex: 100
         });
@@ -542,11 +544,11 @@ const MapView = {
             this.infoWindows.forEach(iw => iw.close());
             
             const infoWindow = new AMap.InfoWindow({
-                content: `<div style="padding:10px;min-width:200px;">
-                    <div style="font-size:15px;font-weight:600;margin-bottom:6px;">${UI.escapeHTML(shop.name)}</div>
-                    <div style="font-size:12px;color:#666;margin-bottom:3px;">📍 ${shop.distance !== undefined ? UI.formatDistance(shop.distance) : ''}</div>
-                    <div style="font-size:12px;color:#666;margin-bottom:3px;">📅 收藏${days}天</div>
-                    <div style="font-size:12px;color:#666;">${visitedText}</div>
+                content: `<div style="padding:0.20rem;min-width:4.00rem;">
+                    <div style="font-size:0.30rem;font-weight:600;margin-bottom:0.12rem;">${UI.escapeHTML(shop.name)}</div>
+                    <div style="font-size:0.24rem;color:#666;margin-bottom:0.06rem;">📍 ${shop.distance !== undefined ? UI.formatDistance(shop.distance) : ''}</div>
+                    <div style="font-size:0.24rem;color:#666;margin-bottom:0.06rem;">📅 收藏${days}天</div>
+                    <div style="font-size:0.24rem;color:#666;">${visitedText}</div>
                 </div>`,
                 offset: new AMap.Pixel(0, -20)
             });
@@ -1069,7 +1071,7 @@ const Pages = {
     renderEditNotes(shop) {
         const notesList = document.getElementById('edit-notes-list');
         if (!shop.notes || shop.notes.length === 0) {
-            notesList.innerHTML = '<div style="color:var(--text-hint);font-size:13px;">暂无备注</div>';
+            notesList.innerHTML = '<div style="color:var(--text-hint);font-size:0.26rem;">暂无备注</div>';
             return;
         }
         notesList.innerHTML = shop.notes.map((note, index) => `
