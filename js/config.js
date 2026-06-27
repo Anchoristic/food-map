@@ -7,8 +7,8 @@
 
     // 高德地图配置 - 部署时注入实际值
     var AMAP_CONFIG = {
-        key: '',           // 高德地图 Key，部署时注入
-        securityJsCode: '' // 高德地图安全密钥，部署时注入
+        key: 'f0715f44af28ca680306e944871af0dd',           // 高德地图 Key，部署时注入
+        securityJsCode: 'ac9ec1497ddeda8161eba133a1651c30' // 高德地图安全密钥，部署时注入
     };
 
     // 注入安全密钥配置
